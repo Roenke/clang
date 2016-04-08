@@ -331,35 +331,6 @@ configure_file(
 
 include(CMakeParseArguments)
 
-function(clang_tablegen)
-  # Syntax:
-  # clang_tablegen output-file [tablegen-arg ...] SOURCE source-file
-  # [[TARGET cmake-target-name] [DEPENDS extra-dependency ...]]
-  #
-  # Generates a custom command for invoking tblgen as
-  #
-  # tblgen source-file -o=output-file tablegen-arg ...
-  #
-  # and, if cmake-target-name is provided, creates a custom target for
-  # executing the custom command depending on output-file. It is
-  # possible to list more files to depend after DEPENDS.
-
-  cmake_parse_arguments(CTG "" "SOURCE;TARGET" "" ${ARGN})
-
-  if( NOT CTG_SOURCE )
-    message(FATAL_ERROR "SOURCE source-file required by clang_tablegen")
-  endif()
-
-  set( LLVM_TARGET_DEFINITIONS ${CTG_SOURCE} )
-  tablegen(CLANG ${CTG_UNPARSED_ARGUMENTS})
-
-  if(CTG_TARGET)
-    add_public_tablegen_target(${CTG_TARGET})
-    set_target_properties( ${CTG_TARGET} PROPERTIES FOLDER "Clang tablegenning")
-    set_property(GLOBAL APPEND PROPERTY CLANG_TABLEGEN_TARGETS ${CTG_TARGET})
-  endif()
-endfunction(clang_tablegen)
-
 macro(set_clang_windows_version_resource_properties name)
   if(DEFINED windows_resource_file)
     set_windows_version_resource_properties(${name} ${windows_resource_file}

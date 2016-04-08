@@ -70,63 +70,10 @@ struct StaticDiagInfoRec {
 
 } // namespace anonymous
 
-static const StaticDiagInfoRec StaticDiagInfo[] = {
-#define DIAG(ENUM, CLASS, DEFAULT_SEVERITY, DESC, GROUP, SFINAE, NOWERROR,     \
-             SHOWINSYSHEADER, CATEGORY)                                        \
-  {                                                                            \
-    diag::ENUM, DEFAULT_SEVERITY, CLASS, DiagnosticIDs::SFINAE, NOWERROR,      \
-        SHOWINSYSHEADER, CATEGORY, GROUP, STR_SIZE(DESC, uint16_t), DESC       \
-  }                                                                            \
-  ,
-#include "clang/Basic/DiagnosticLexKinds.inc"
-#undef DIAG
-};
-
-static const unsigned StaticDiagInfoSize = llvm::array_lengthof(StaticDiagInfo);
-
 /// GetDiagInfo - Return the StaticDiagInfoRec entry for the specified DiagID,
 /// or null if the ID is invalid.
 static const StaticDiagInfoRec *GetDiagInfo(unsigned DiagID) {
-  // If assertions are enabled, verify that the StaticDiagInfo array is sorted.
-#ifndef NDEBUG
-  static bool IsFirst = true; // So the check is only performed on first call.
-  if (IsFirst) {
-    assert(std::is_sorted(std::begin(StaticDiagInfo),
-                          std::end(StaticDiagInfo)) &&
-           "Diag ID conflict, the enums at the start of clang::diag (in "
-           "DiagnosticIDs.h) probably need to be increased");
-    IsFirst = false;
-  }
-#endif
-
-  // Out of bounds diag. Can't be in the table.
-  using namespace diag;
-  if (DiagID >= DIAG_UPPER_LIMIT || DiagID <= DIAG_START_COMMON)
-    return nullptr;
-
-  // Compute the index of the requested diagnostic in the static table.
-  // 1. Add the number of diagnostics in each category preceding the
-  //    diagnostic and of the category the diagnostic is in. This gives us
-  //    the offset of the category in the table.
-  // 2. Subtract the number of IDs in each category from our ID. This gives us
-  //    the offset of the diagnostic in the category.
-  // This is cheaper than a binary search on the table as it doesn't touch
-  // memory at all.
-  unsigned Offset = 0;
-  unsigned ID = DiagID - DIAG_START_COMMON - 1;
-  // Avoid out of bounds reads.
-  if (ID + Offset >= StaticDiagInfoSize)
-    return nullptr;
-
-  assert(ID < StaticDiagInfoSize && Offset < StaticDiagInfoSize);
-
-  const StaticDiagInfoRec *Found = &StaticDiagInfo[ID + Offset];
-  // If the diag id doesn't match we found a different diag, abort. This can
-  // happen when this function is called with an ID that points into a hole in
-  // the diagID space.
-  if (Found->DiagID != DiagID)
-    return nullptr;
-  return Found;
+  return nullptr;
 }
 
 static DiagnosticMapping GetDefaultDiagMapping(unsigned DiagID) {
@@ -182,10 +129,6 @@ DiagnosticsEngine::DiagState::getOrAddMapping(diag::kind Diag) {
 }
 
 static const StaticDiagCategoryRec CategoryNameTable[] = {
-#define GET_CATEGORY_TABLE
-#define CATEGORY(X, ENUM) { X, STR_SIZE(X, uint8_t) },
-#include "clang/Basic/DiagnosticGroups.inc"
-#undef GET_CATEGORY_TABLE
   { nullptr, 0 }
 };
 
@@ -486,9 +429,6 @@ DiagnosticIDs::getDiagnosticsInGroup(diag::Flavor Flavor, StringRef Group,
 
 void DiagnosticIDs::getAllDiagnostics(diag::Flavor Flavor,
                                      SmallVectorImpl<diag::kind> &Diags) const {
-  for (unsigned i = 0; i != StaticDiagInfoSize; ++i)
-    if (StaticDiagInfo[i].getFlavor() == Flavor)
-      Diags.push_back(StaticDiagInfo[i].DiagID);
 }
 
 StringRef DiagnosticIDs::getNearestOption(diag::Flavor Flavor,
@@ -565,7 +505,6 @@ bool DiagnosticIDs::ProcessDiag(DiagnosticsEngine &Diag) const {
     // stop a flood of bogus errors.
     if (Diag.ErrorLimit && Diag.NumErrors > Diag.ErrorLimit &&
         DiagLevel == DiagnosticIDs::Error) {
-      Diag.SetDelayedDiagnostic(diag::fatal_too_many_errors);
       return false;
     }
   }
