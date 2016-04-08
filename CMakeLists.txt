@@ -116,65 +116,65 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
   set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX} )
   set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX} )
 
-  if(LLVM_INCLUDE_TESTS)
-    set(Python_ADDITIONAL_VERSIONS 2.7)
-    include(FindPythonInterp)
-    if(NOT PYTHONINTERP_FOUND)
-      message(FATAL_ERROR
-"Unable to find Python interpreter, required for builds and testing.
+#  if(LLVM_INCLUDE_TESTS)
+#    set(Python_ADDITIONAL_VERSIONS 2.7)
+#    include(FindPythonInterp)
+#    if(NOT PYTHONINTERP_FOUND)
+#      message(FATAL_ERROR
+#"Unable to find Python interpreter, required for builds and testing.
 
-Please install Python or specify the PYTHON_EXECUTABLE CMake variable.")
-    endif()
+#Please install Python or specify the PYTHON_EXECUTABLE CMake variable.")
+#    endif()
 
-    if( ${PYTHON_VERSION_STRING} VERSION_LESS 2.7 )
-      message(FATAL_ERROR "Python 2.7 or newer is required")
-    endif()
+#    if( ${PYTHON_VERSION_STRING} VERSION_LESS 2.7 )
+#      message(FATAL_ERROR "Python 2.7 or newer is required")
+#    endif()
 
-    # Check prebuilt llvm/utils.
-    if(EXISTS ${LLVM_TOOLS_BINARY_DIR}/FileCheck${CMAKE_EXECUTABLE_SUFFIX}
-        AND EXISTS ${LLVM_TOOLS_BINARY_DIR}/count${CMAKE_EXECUTABLE_SUFFIX}
-        AND EXISTS ${LLVM_TOOLS_BINARY_DIR}/not${CMAKE_EXECUTABLE_SUFFIX})
-      set(LLVM_UTILS_PROVIDED ON)
-    endif()
+#    # Check prebuilt llvm/utils.
+#    if(EXISTS ${LLVM_TOOLS_BINARY_DIR}/FileCheck${CMAKE_EXECUTABLE_SUFFIX}
+#        AND EXISTS ${LLVM_TOOLS_BINARY_DIR}/count${CMAKE_EXECUTABLE_SUFFIX}
+#        AND EXISTS ${LLVM_TOOLS_BINARY_DIR}/not${CMAKE_EXECUTABLE_SUFFIX})
+#      set(LLVM_UTILS_PROVIDED ON)
+#    endif()
 
-    if(EXISTS ${LLVM_MAIN_SRC_DIR}/utils/lit/lit.py)
-      set(LLVM_LIT ${LLVM_MAIN_SRC_DIR}/utils/lit/lit.py)
-      if(NOT LLVM_UTILS_PROVIDED)
-        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/FileCheck utils/FileCheck)
-        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/count utils/count)
-        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/not utils/not)
-        set(LLVM_UTILS_PROVIDED ON)
-        set(CLANG_TEST_DEPS FileCheck count not)
-      endif()
-      set(UNITTEST_DIR ${LLVM_MAIN_SRC_DIR}/utils/unittest)
-      if(EXISTS ${UNITTEST_DIR}/googletest/include/gtest/gtest.h
-          AND NOT EXISTS ${LLVM_LIBRARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}
-          AND EXISTS ${UNITTEST_DIR}/CMakeLists.txt)
-        add_subdirectory(${UNITTEST_DIR} utils/unittest)
-      endif()
-    else()
-      # Seek installed Lit.
-      find_program(LLVM_LIT "lit.py" ${LLVM_MAIN_SRC_DIR}/utils/lit
-        DOC "Path to lit.py")
-    endif()
+#    if(EXISTS ${LLVM_MAIN_SRC_DIR}/utils/lit/lit.py)
+#      set(LLVM_LIT ${LLVM_MAIN_SRC_DIR}/utils/lit/lit.py)
+#      if(NOT LLVM_UTILS_PROVIDED)
+#        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/FileCheck utils/FileCheck)
+#        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/count utils/count)
+#        add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/not utils/not)
+#        set(LLVM_UTILS_PROVIDED ON)
+#        set(CLANG_TEST_DEPS FileCheck count not)
+#      endif()
+#      set(UNITTEST_DIR ${LLVM_MAIN_SRC_DIR}/utils/unittest)
+#      if(EXISTS ${UNITTEST_DIR}/googletest/include/gtest/gtest.h
+#          AND NOT EXISTS ${LLVM_LIBRARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}
+#          AND EXISTS ${UNITTEST_DIR}/CMakeLists.txt)
+#        add_subdirectory(${UNITTEST_DIR} utils/unittest)
+#      endif()
+#    else()
+#      # Seek installed Lit.
+#      find_program(LLVM_LIT "lit.py" ${LLVM_MAIN_SRC_DIR}/utils/lit
+#        DOC "Path to lit.py")
+#    endif()
 
-    if(LLVM_LIT)
-      # Define the default arguments to use with 'lit', and an option for the user
-      # to override.
-      set(LIT_ARGS_DEFAULT "-sv")
-      if (MSVC OR XCODE)
-        set(LIT_ARGS_DEFAULT "${LIT_ARGS_DEFAULT} --no-progress-bar")
-      endif()
-      set(LLVM_LIT_ARGS "${LIT_ARGS_DEFAULT}" CACHE STRING "Default options for lit")
+#    if(LLVM_LIT)
+#      # Define the default arguments to use with 'lit', and an option for the user
+#      # to override.
+#      set(LIT_ARGS_DEFAULT "-sv")
+#      if (MSVC OR XCODE)
+#        set(LIT_ARGS_DEFAULT "${LIT_ARGS_DEFAULT} --no-progress-bar")
+#      endif()
+#      set(LLVM_LIT_ARGS "${LIT_ARGS_DEFAULT}" CACHE STRING "Default options for lit")
 
-      # On Win32 hosts, provide an option to specify the path to the GnuWin32 tools.
-      if( WIN32 AND NOT CYGWIN )
-        set(LLVM_LIT_TOOLS_DIR "" CACHE PATH "Path to GnuWin32 tools")
-      endif()
-    else()
-      set(LLVM_INCLUDE_TESTS OFF)
-    endif()
-  endif()
+#      # On Win32 hosts, provide an option to specify the path to the GnuWin32 tools.
+#      if( WIN32 AND NOT CYGWIN )
+#        set(LLVM_LIT_TOOLS_DIR "" CACHE PATH "Path to GnuWin32 tools")
+#      endif()
+#    else()
+#      set(LLVM_INCLUDE_TESTS OFF)
+#    endif()
+#  endif()
 
   set( CLANG_BUILT_STANDALONE 1 )
   set(BACKEND_PACKAGE_STRING "LLVM ${LLVM_PACKAGE_VERSION}")
@@ -537,9 +537,9 @@ set(LIBCLANG_LIBRARY_VERSION
     "Version number that will be placed into the libclang library , in the form XX.YY")
 mark_as_advanced(CLANG_EXECUTABLE_VERSION LIBCLANG_LIBRARY_VERSION)
 
-option(CLANG_INCLUDE_TESTS
-       "Generate build targets for the Clang unit tests."
-       ${LLVM_INCLUDE_TESTS})
+#option(CLANG_INCLUDE_TESTS
+#       "Generate build targets for the Clang unit tests."
+#       ${LLVM_INCLUDE_TESTS})
 
 add_subdirectory(utils/TableGen)
 
@@ -550,8 +550,8 @@ get_property(CLANG_TABLEGEN_TARGETS GLOBAL PROPERTY CLANG_TABLEGEN_TARGETS)
 list(APPEND LLVM_COMMON_DEPENDS ${CLANG_TABLEGEN_TARGETS})
 
 add_subdirectory(lib)
-add_subdirectory(tools)
-add_subdirectory(runtime)
+#add_subdirectory(tools)
+#add_subdirectory(runtime)
 
 option(CLANG_BUILD_EXAMPLES "Build CLANG example programs by default." OFF)
 if (CLANG_BUILD_EXAMPLES)
@@ -818,6 +818,6 @@ if (CLANG_ENABLE_BOOTSTRAP)
   endforeach()
 endif()
 
-if (LLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION)
-  add_subdirectory(utils/ClangVisualizers)
-endif()
+#if (LLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION)
+#  add_subdirectory(utils/ClangVisualizers)
+#endif()
