@@ -1165,7 +1165,7 @@ retry:
       
   case tok::string_literal: {
     if (LToken.hasUDSuffix()) {
-      Diags.Report(LToken.getLocation(), diag::err_invalid_string_udl);
+      std::abort();
       HadError = true;
       goto retry;
     }

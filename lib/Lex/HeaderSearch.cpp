@@ -540,10 +540,6 @@ void HeaderSearch::setTarget(const TargetInfo &Target) {
 static bool checkMSVCHeaderSearch(DiagnosticsEngine &Diags,
                                   const FileEntry *MSFE, const FileEntry *FE,
                                   SourceLocation IncludeLoc) {
-  if (MSFE && FE != MSFE) {
-    Diags.Report(IncludeLoc, diag::ext_pp_include_search_ms) << MSFE->getName();
-    return true;
-  }
   return false;
 }
 
@@ -655,19 +651,7 @@ const FileEntry *HeaderSearch::LookupFile(
         if (First)
           return FE;
 
-        // Otherwise, we found the path via MSVC header search rules.  If
-        // -Wmsvc-include is enabled, we have to keep searching to see if we
-        // would've found this header in -I or -isystem directories.
-        if (Diags.isIgnored(diag::ext_pp_include_search_ms, IncludeLoc)) {
-          return FE;
-        } else {
-          MSFE = FE;
-          if (SuggestedModule) {
-            MSSuggestedModule = *SuggestedModule;
-            *SuggestedModule = ModuleMap::KnownHeader();
-          }
-          break;
-        }
+        return FE;
       }
       First = false;
     }

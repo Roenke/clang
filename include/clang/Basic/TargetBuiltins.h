@@ -25,8 +25,6 @@ namespace clang {
   namespace NEON {
   enum {
     LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
-#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-#include "clang/Basic/BuiltinsNEON.def"
     FirstTSBuiltin
   };
   }
@@ -36,8 +34,6 @@ namespace clang {
     enum {
       LastTIBuiltin = clang::Builtin::FirstTSBuiltin-1,
       LastNEONBuiltin = NEON::FirstTSBuiltin - 1,
-#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-#include "clang/Basic/BuiltinsARM.def"
       LastTSBuiltin
     };
   }
@@ -47,8 +43,6 @@ namespace clang {
   enum {
     LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
     LastNEONBuiltin = NEON::FirstTSBuiltin - 1,
-  #define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-  #include "clang/Basic/BuiltinsAArch64.def"
     LastTSBuiltin
   };
   }
@@ -57,8 +51,6 @@ namespace clang {
   namespace PPC {
     enum {
         LastTIBuiltin = clang::Builtin::FirstTSBuiltin-1,
-#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-#include "clang/Basic/BuiltinsPPC.def"
         LastTSBuiltin
     };
   }

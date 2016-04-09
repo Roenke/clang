@@ -116,13 +116,7 @@ llvm::MemoryBuffer *ContentCache::getBuffer(DiagnosticsEngine &Diag,
     for (unsigned i = 0, e = ContentsEntry->getSize(); i != e; ++i)
       Ptr[i] = FillStr[i % FillStr.size()];
 
-    if (Diag.isDiagnosticInFlight())
-      Diag.SetDelayedDiagnostic(diag::err_cannot_open_file,
-                                ContentsEntry->getName(),
-                                BufferOrError.getError().message());
-    else
-      Diag.Report(Loc, diag::err_cannot_open_file)
-          << ContentsEntry->getName() << BufferOrError.getError().message();
+    std::abort();
 
     Buffer.setInt(Buffer.getInt() | InvalidFlag);
     
@@ -135,12 +129,7 @@ llvm::MemoryBuffer *ContentCache::getBuffer(DiagnosticsEngine &Diag,
   // Check that the file's size is the same as in the file entry (which may
   // have come from a stat cache).
   if (getRawBuffer()->getBufferSize() != (size_t)ContentsEntry->getSize()) {
-    if (Diag.isDiagnosticInFlight())
-      Diag.SetDelayedDiagnostic(diag::err_file_modified,
-                                ContentsEntry->getName());
-    else
-      Diag.Report(Loc, diag::err_file_modified)
-        << ContentsEntry->getName();
+    std::abort();
 
     Buffer.setInt(Buffer.getInt() | InvalidFlag);
     if (Invalid) *Invalid = true;
@@ -165,8 +154,7 @@ llvm::MemoryBuffer *ContentCache::getBuffer(DiagnosticsEngine &Diag,
     .Default(nullptr);
 
   if (InvalidBOM) {
-    Diag.Report(Loc, diag::err_unsupported_bom)
-      << InvalidBOM << ContentsEntry->getName();
+    std::abort();
     Buffer.setInt(Buffer.getInt() | InvalidFlag);
   }
   
